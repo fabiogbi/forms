@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Entrega de Peças</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/2.3.2/signature_pad.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 10px;
+        }
+        #dataHora {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        h1 {
+            background-color: #007BFF;
+            color: white;
+            padding: 8px;
+            font-size: 20px;
+        }
+        form {
+            max-width: 350px;
+            margin: auto;
+            text-align: left;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 6px;
+            font-size: 14px;
+        }
+        button {
+            margin-top: 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .produto-container {
+            border: 1px solid #007BFF;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f4f4f4;
+            margin-top: 15px;
+        }
+        /* Rodapé estilizado */
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            animation: fadeIn 2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        /* Área de assinatura */
+        .signature-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .signature-pad {
+            border: 2px solid #007BFF;
+            width: 100%;
+            height: 150px;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Formulário de Entrega de Peças</h1>
+    <div id="dataHora"></div>
+    <h2 id="usuarioNome"></h2>
+
+    <script>
+        function solicitarNomeUsuario() {
+            const nomeUsuario = prompt("Digite seu nome:");
+            if (nomeUsuario) {
+                document.getElementById("usuarioNome").innerText = `Preenchido por: ${nomeUsuario}`;
+            } else {
+                document.getElementById("usuarioNome").innerText = "Usuário não identificado.";
+            }
+        }
+        solicitarNomeUsuario();
+    </script>
+
+    <form id="formEntrega">
+        <div class="form-group">
+            <label for="empresa">Empresa Terceira:</label>
+            <input type="text" id="empresa" name="empresa">
+        </div>
+
+        <div class="form-group">
+            <label for="tecnico">Nome do Técnico:</label>
+            <input type="text" id="tecnico" name="tecnico" required>
+        </div>
+
+        <div class="produto-container">
+            <h2>Dados do Produto</h2>
+
+            <div class="form-group">
+                <label for="codigo">Código do produto:</label>
+                <input type="text" id="codigo" name="codigo">
+            </div>
+
+            <div class="form-group">
+                <label for="descricao">Descrição:</label>
+                <input type="text" id="descricao" name="descricao">
+            </div>
+
+            <div class="form-group">
+                <label for="quantidade">Quantidade:</label>
+                <input type="number" id="quantidade" name="quantidade">
+            </div>
+
+            <div class="form-group">
+                <label for="destino">Destino:</label>
+                <input type="text" id="destino" name="destino">
+            </div>
+        </div>
+
+        <!-- Área de assinatura -->
+        <div class="signature-container">
+            <h2>Assinatura do Responsável</h2>
+            <canvas id="signaturePad" class="signature-pad"></canvas>
+            <button type="button" onclick="limparAssinatura()">Limpar Assinatura</button>
+        </div>
+
+        <button type="button" onclick="gerarRelatorioPDF()">Gerar Relatório PDF</button>
+    </form>
+
+    <footer>
+        Desenvolvido por Fábio Gomes
+    </footer>
+
+    <script>
+        function atualizarDataHora() {
+            const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR');
+            const horaFormatada = agora.toLocaleTimeString('pt-BR');
+            document.getElementById("dataHora").innerText = `Data: ${dataFormatada} | Hora: ${horaFormatada}`;
+        }
+        setInterval(atualizarDataHora, 1000);
+        atualizarDataHora();
+
+        function gerarRelatorioPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("Relatório de Retirada de Produto", 10, 10);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(12);
+            doc.text("Documento válido para comprovação legal", 10, 20);
+            doc.text(`Data e Hora: ${new Date().toLocaleString()}`, 10, 30);
+            doc.text(`Nome: ${document.getElementById("tecnico").value}`, 10, 50);
+            doc.text(`Empresa: ${document.getElementById("empresa").value}`, 10, 60);
+            doc.text(`Código: ${document.getElementById("codigo").value}`, 10, 90);
+            doc.text(`Descrição: ${document.getElementById("descricao").value}`, 10, 100);
+            doc.text(`Quantidade: ${document.getElementById("quantidade").value}`, 10, 110);
+            doc.text(`Destino: ${document.getElementById("destino").value}`, 10, 120);
+
+            // Salvar o documento
+            doc.save("Relatorio_Retirada.pdf");
+        }
+
+        const canvas = document.getElementById("signaturePad");
+        const signaturePad = new SignaturePad(canvas);
+
+        function limparAssinatura() {
+            signaturePad.clear();
+        }
+    </script>
+</body>
+</html>
